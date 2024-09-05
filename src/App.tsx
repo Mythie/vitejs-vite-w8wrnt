@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Bell,
   CircleUser,
@@ -9,18 +10,17 @@ import {
   Search,
   ShoppingCart,
   Users,
-} from 'lucide-react';
+} from "lucide-react";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,14 +28,28 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+} from "@/components/ui/dropdown-menu";
+import { EmbedDirectTemplate } from "@documenso/embed-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useState } from "react";
 
 export const description =
-  'A products dashboard with a sidebar navigation and a main content area. The dashboard has a header with a search input and a user menu. The sidebar has a logo, navigation links, and a card with a call to action. The main content area shows an empty state with a call to action.';
+  "A products dashboard with a sidebar navigation and a main content area. The dashboard has a header with a search input and a user menu. The sidebar has a logo, navigation links, and a card with a call to action. The main content area shows an empty state with a call to action.";
 
 export default function Dashboard() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+
+  const [step, setStep] = useState<"details" | "signing" | "complete">(
+    "details"
+  );
+
+  const onDocumentComplete = () => {
+    setStep("complete");
+  };
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -74,7 +88,7 @@ export default function Dashboard() {
                 aria-disabled
               >
                 <Package className="h-4 w-4" />
-                Products{' '}
+                Products{" "}
               </a>
               <a
                 href="#"
@@ -226,41 +240,126 @@ export default function Dashboard() {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <div className="flex flex-col items-start">
-            <h1 className="text-lg font-semibold md:text-2xl">Onboarding</h1>
+        <main className="flex flex-1 flex-col items-center justify-center p-4 lg:p-6">
+          <div>
+            <AnimatePresence initial={false} presenceAffectsLayout mode="wait">
+              {step === "details" && (
+                <motion.form
+                  key="details"
+                  className="flex flex-col gap-y-2 flex-1"
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  x-chunk="dashboard-02-chunk-1"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setStep("signing");
+                  }}
+                >
+                  <div className="flex flex-col items-start">
+                    <h1 className="text-lg font-semibold md:text-2xl">
+                      Onboarding
+                    </h1>
 
-            <p className="mt-2 text-sm text-muted-foreground max-w-[55ch]">
-              Welcome to your new account, to get started we will need you to
-              sign our Product Agreement and Terms of Service.
-            </p>
-          </div>
+                    <p className="mt-2 text-sm text-muted-foreground max-w-[55ch]">
+                      Welcome to your new account, to get started we will need
+                      you to sign our Product Agreement and Terms of Service.
+                    </p>
+                  </div>
 
-          <div
-            className="flex flex-col gap-y-2 flex-1 mt-8"
-            x-chunk="dashboard-02-chunk-1"
-          >
-            <div className="max-w-md">
-              <Label>Full Name</Label>
+                  <div className="max-w-md">
+                    <Label>Full Name</Label>
 
-              <Input type="text" className="mt-1 " />
+                    <Input
+                      type="text"
+                      className="mt-1"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      autoComplete="off"
+                      required
+                    />
 
-              <p className="text-xs text-muted-foreground">
-                Your legal name, required so we can confirm your consent to the
-                agreement
-              </p>
-            </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Your legal name, required so we can confirm your consent
+                      to the agreement
+                    </p>
+                  </div>
 
-            <div className="max-w-md">
-              <Label>Email</Label>
+                  <div className="max-w-md">
+                    <Label>Email</Label>
 
-              <Input type="email" className="mt-1 " />
+                    <Input
+                      type="email"
+                      className="mt-1"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value.trim())}
+                      autoComplete="off"
+                      required
+                    />
 
-              <p className="text-xs text-muted-foreground">
-                Your contact email, this is where we will send the completed
-                agreement
-              </p>
-            </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Your contact email, this is where we will send the
+                      completed agreement
+                    </p>
+                  </div>
+
+                  <div className="mt-4 max-w-md flex items-center justify-between flex-row-reverse">
+                    <Button type="submit">Next Step</Button>
+                  </div>
+                </motion.form>
+              )}
+
+              {step === "signing" && (
+                <motion.div
+                  key="signing"
+                  className="flex flex-col gap-y-2 flex-1"
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  x-chunk="dashboard-02-chunk-1"
+                >
+                  <div className="flex flex-col items-start">
+                    <h1 className="text-lg font-semibold md:text-2xl">
+                      Onboarding: Signing
+                    </h1>
+
+                    <p className="mt-2 text-sm text-muted-foreground max-w-[55ch]">
+                      Please sign the agreement and terms of service.
+                    </p>
+                  </div>
+
+                  <EmbedDirectTemplate
+                    host="https://stg-app.documenso.com"
+                    token="nEmIk_rcyiA2xJiBqs2qu"
+                    className="mt-4 min-h-[75dvh] w-[1000px] -m-6 overflow-hidden"
+                    externalId="my-application"
+                    name={fullName.trim()}
+                    lockName={true}
+                    email={email}
+                    lockEmail={true}
+                    onDocumentCompleted={onDocumentComplete}
+                  />
+                </motion.div>
+              )}
+
+              {step === "complete" && (
+                <motion.div
+                  key="complete"
+                  className="flex flex-col gap-y-2 flex-1"
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  x-chunk="dashboard-02-chunk-1"
+                >
+                  <h1 className="text-lg font-semibold">Thank you!</h1>
+
+                  <p className="text-sm text-muted-foreground max-w-[55ch]">
+                    Your agreement has been signed and a copy should be sent to
+                    your email address shortly.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </main>
       </div>
